@@ -1,33 +1,54 @@
 import numpy as np
 import random
 
-x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+x = np.arange(27).reshape(9, 3)
 y = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
-m = len(x)
+#m = len(y)
+#n = x.shape[0]
 
 alpha = 0.0001
-def calcJ(a, b):
+def calcJ(X,Y,W, b):
+
+    n = X.shape[1]
+    m = len(Y)
+
     J = 0
-    Da = 0
+    DW = np.zeros(n)
     Db = 0
-
+    
     for i in range(m):
-        J = J + (a*x[i] + b - y[i]) ** 2
-        Da = Da + (a*x[i] + b - y[i]) * x[i] * 2
-        Db = Db + (a*x[i] + b - y[i]) * 2
+        
+        diff=0
+        y_hat = b
+        for j in range(n):
+            y_hat+=W[j]*X[i,j]
 
-    return J/m, Da/m, Db/m
+        diff=y_hat-Y[i]
+        
+        J = J + diff ** 2
+        Db = Db + diff * 2
+        for j in range (n):
+            DW[j] = DW[j] + diff * X[i,j] * 2
 
-def train(iterations):
-    a = random.randint(-10, 10)
+
+    return J/m, DW/m, Db/m
+
+def train(X, Y, iterations, alpha):
+
+    w = np.zeros(len(X[0]))
+    for i in range(len(X[0])):
+        w[i] = random.randint(-26, 26)
+
     b = random.randint(-10, 10)
 
     for i in range(iterations):
-        J, Da, Db = calcJ(a, b)
-        a -= Da*alpha
+        J, Da, Db = calcJ(X, Y, w, b)
+        w -= Da*alpha
         b -= Db*alpha
-    return a, b
+    return w, b
 
-A, B =train(1000000)
-print("A = ", A)
+W, B = train(x, y, 1000000, alpha)
+for i in range (len(W)):
+    print(f"W={W[i]},", end=" ")
+print()
 print("B = ", B)
